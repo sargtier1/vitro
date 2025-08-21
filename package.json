@@ -1,0 +1,39 @@
+{
+  "name": "my-turborepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:start": "node dev-start.js",
+    "dev:verbose": "DEBUG=* turbo dev",
+    "dev:api": "pnpm --filter @repo/api dev",
+    "dev:web": "pnpm --filter @repo/web dev",
+    "dev:logs": "NODE_ENV=development DEBUG=prisma:* turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean",
+    "test": "turbo test",
+    "generate": "pnpm --filter @repo/generator generate",
+    "biome:check": "pnpm --filter @repo/biome-config check",
+    "biome:fix": "pnpm --filter @repo/biome-config check:fix",
+    "biome:format": "pnpm --filter @repo/biome-config format:fix",
+    "biome:lint": "pnpm --filter @repo/biome-config lint",
+    "biome:lint:fix": "pnpm --filter @repo/biome-config lint:fix",
+    "db:generate": "turbo db:generate",
+    "db:migrate": "turbo db:migrate",
+    "db:push": "turbo db:push",
+    "db:deploy": "turbo db:deploy",
+    "db:studio": "pnpm --filter @repo/db db:studio",
+    "db:reset": "pnpm --filter @repo/db db:reset",
+    "db:seed": "pnpm --filter @repo/db db:seed",
+    "infra:setup": "pnpm --filter @repo/northflank run setup",
+    "infra:deploy": "pnpm --filter @repo/northflank run deploy"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "turbo": "latest",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@10.15.0"
+}

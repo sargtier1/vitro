@@ -1,0 +1,42 @@
+{
+  "name": "@repo/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:check": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
+    "routes:generate": "tsr generate",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --fix src/",
+    "format": "pnpm --filter @repo/biome-config format:fix"
+  },
+  "dependencies": {
+    "@repo/auth": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@repo/trpc": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/router-devtools": "catalog:",
+    "better-auth": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@tanstack/router-cli": "catalog:",
+    "@tanstack/router-vite-plugin": "^1.131.27",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

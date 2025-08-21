@@ -1,0 +1,62 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "globalEnv": ["NODE_ENV"],
+  "envMode": "loose",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "db:generate"],
+      "inputs": [".env"],
+      "outputs": ["dist/**", ".output/**"],
+      "outputLogs": "new-only"
+    },
+    "dev": {
+      "dependsOn": ["db:generate"],
+      "cache": false,
+      "persistent": true,
+      "outputLogs": "full"
+    },
+    "type-check": {
+      "dependsOn": ["^build", "db:generate"],
+      "outputLogs": "errors-only"
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "db:generate"],
+      "outputLogs": "errors-only"
+    },
+    "lint": {
+      "outputLogs": "errors-only"
+    },
+    "test": {
+      "outputLogs": "errors-only"
+    },
+    "db:generate": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", ".env"],
+      "outputs": ["generated/**", "node_modules/.prisma/**"],
+      "outputLogs": "errors-only"
+    },
+    "db:migrate": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**", ".env"],
+      "outputLogs": "errors-only"
+    },
+    "db:push": {
+      "cache": false,
+      "inputs": ["prisma/schema.prisma", ".env"],
+      "outputLogs": "errors-only"
+    },
+    "db:deploy": {
+      "cache": false,
+      "dependsOn": ["db:generate"],
+      "inputs": ["prisma/schema.prisma", "prisma/migrations/**", ".env"],
+      "outputLogs": "errors-only"
+    },
+    "infra:setup": {
+      "cache": false
+    },
+    "infra:deploy": {
+      "cache": false
+    }
+  }
+}

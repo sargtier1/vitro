@@ -1,0 +1,22 @@
+{
+  "name": "@repo/biome-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared Biome configuration for the Vitro Supercharged monorepo",
+  "exports": {
+    "./config": "./biome.json",
+    "./biome.json": "./biome.json"
+  },
+  "files": ["biome.json"],
+  "scripts": {
+    "lint": "biome lint ../../",
+    "lint:fix": "biome lint --write ../../",
+    "format": "biome format ../../",
+    "format:fix": "biome format --write ../../",
+    "check": "biome check ../../",
+    "check:fix": "biome check --write ../../"
+  },
+  "dependencies": {
+    "@biomejs/biome": "catalog:"
+  }
+}

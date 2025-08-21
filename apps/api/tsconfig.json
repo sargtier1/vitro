@@ -1,0 +1,11 @@
+{
+  "extends": "@repo/tsconfig/node",
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "moduleResolution": "bundler",
+    "noEmit": true
+  },
+  "include": ["src/**/*", "nitro.config.ts", ".nitro/types/**/*"],
+  "exclude": ["node_modules", ".output"]
+}

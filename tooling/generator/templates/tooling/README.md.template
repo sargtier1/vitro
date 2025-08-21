@@ -1,0 +1,20 @@
+# @repo/{{name}}
+
+{{description}}
+
+## Usage
+
+```bash
+# Run the tool
+pnpm --filter @repo/{{name}} {{name}}
+```
+
+## Development
+
+```bash
+# Build the package
+pnpm build
+
+# Watch for changes
+pnpm dev
+```

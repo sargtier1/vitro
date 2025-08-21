@@ -1,0 +1,30 @@
+{
+  "name": "@repo/api",
+  "private": true,
+  "scripts": {
+    "build": "nitro build",
+    "dev": "nitro dev",
+    "preview": "nitro preview",
+    "typecheck": "nitro prepare && tsc --noEmit",
+    "type-check": "nitro prepare && tsc --noEmit",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --fix src/"
+  },
+  "dependencies": {
+    "@repo/auth": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@repo/trpc": "workspace:*",
+    "@trpc/server": "^11.0.0",
+    "better-auth": "^0.7.0",
+    "pg": "^8.12.0",
+    "nitropack": "catalog:",
+    "h3": "catalog:",
+    "arktype": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "^8.11.0",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

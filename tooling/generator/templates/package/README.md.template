@@ -1,0 +1,24 @@
+# @repo/{{name}}
+
+{{description}}
+
+## Usage
+
+```typescript
+import { hello } from '@repo/{{name}}';
+
+console.log(hello('World')); // Hello, World!
+```
+
+## Development
+
+```bash
+# Build the package
+pnpm build
+
+# Watch for changes
+pnpm dev
+
+# Type check
+pnpm type-check
+```

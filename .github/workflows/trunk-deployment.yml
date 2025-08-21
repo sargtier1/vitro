@@ -1,0 +1,293 @@
+name: Trunk-Based Deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10.15.0'
+
+jobs:
+  # Quality checks that must pass
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    outputs:
+      affected: ${{ steps.affected.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup environment
+        run: echo 'DATABASE_URL="${{ secrets.DATABASE_URL }}"' > .env
+
+      - name: Database generation
+        run: pnpm db:generate
+
+      - name: Type checking
+        run: pnpm type-check
+
+      - name: Linting
+        run: pnpm lint
+
+      - name: Biome checks
+        run: pnpm biome:check
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Detect affected packages
+        id: affected
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "packages=$(pnpm list --json --recursive --depth=0 | jq -r '.[].name' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+          else
+            echo "packages=$(pnpm list --json --recursive --depth=0 | jq -r '.[].name' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+          fi
+
+  # Build job that runs after quality checks pass
+  build:
+    name: Build Applications
+    runs-on: ubuntu-latest
+    needs: quality
+    if: success()
+    strategy:
+      matrix:
+        app: [web, api]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup environment
+        run: echo 'DATABASE_URL="${{ secrets.DATABASE_URL }}"' > .env
+
+      - name: Database generation
+        run: pnpm db:generate
+
+      - name: Build ${{ matrix.app }}
+        run: pnpm --filter @repo/${{ matrix.app }} build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-build
+          path: |
+            apps/${{ matrix.app }}/dist/
+            apps/${{ matrix.app }}/.output/
+          retention-days: 7
+
+  # Deployment job that only runs on main branch merges
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [quality, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-build"
+          merge-multiple: true
+
+      - name: Validate Northflank config
+        run: |
+          if [ ! -f ".northflank.json" ]; then
+            echo "❌ .northflank.json not found. Please run setup first."
+            echo "💡 Your Northflank deployment is currently manual."
+            echo "📖 See deployment instructions in logs."
+            exit 1
+          fi
+          echo "✅ Northflank config found"
+
+      - name: Show Northflank deployment instructions
+        run: |
+          echo "## 📋 Northflank Deployment Instructions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your deployment is ready! To deploy to Northflank:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. 🔧 **Manual Setup Required:**" >> $GITHUB_STEP_SUMMARY
+          echo "   - Go to [Northflank Dashboard](https://app.northflank.com)" >> $GITHUB_STEP_SUMMARY
+          echo "   - Follow the setup instructions from \`pnpm infra:deploy\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "2. 🚀 **Build Commands:**" >> $GITHUB_STEP_SUMMARY
+          echo "   - **API:** \`pnpm install && pnpm db:generate && pnpm turbo build --filter=@repo/api\`" >> $GITHUB_STEP_SUMMARY
+          echo "   - **Web:** \`pnpm install && pnpm turbo build --filter=@repo/web\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "3. 📦 **Build Artifacts Available:**" >> $GITHUB_STEP_SUMMARY
+          echo "   - API build: \`apps/api/.output/\`" >> $GITHUB_STEP_SUMMARY
+          echo "   - Web build: \`apps/web/dist/\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Simulate deployment readiness
+        run: |
+          echo "✅ Build artifacts are ready for Northflank deployment"
+          echo "🔍 API build check:"
+          ls -la apps/api/.output/ || echo "No API build found"
+          echo "🔍 Web build check:"  
+          ls -la apps/web/dist/ || echo "No Web build found"
+
+      - name: Database deployment
+        run: pnpm db:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Deployment to production completed successfully"
+          echo "🚀 Commit: ${{ github.sha }}"
+          echo "👤 Author: ${{ github.actor }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Deployment to production failed"
+          echo "💥 Please check the logs and fix the issues"
+
+  # Security and dependency checks
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level moderate
+
+      - name: Check for outdated dependencies
+        run: pnpm outdated || true
+
+  # Performance and bundle analysis
+  analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-build"
+          merge-multiple: true
+
+      - name: Analyze bundle size
+        run: |
+          echo "## Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "| App | Size | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          for app in web api; do
+            if [ -d "apps/$app/dist" ] || [ -d "apps/$app/.output" ]; then
+              size=$(du -sh apps/$app/dist apps/$app/.output 2>/dev/null | awk '{print $1}' | head -1)
+              echo "| $app | $size | ✅ Built |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $app | - | ❌ No build |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

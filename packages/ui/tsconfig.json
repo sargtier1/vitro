@@ -1,0 +1,22 @@
+{
+  "extends": "@repo/tsconfig/react",
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "pretty": false,
+    "incremental": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/hooks/*": ["./src/hooks/*"]
+    }
+  },
+  "ts-node": {
+    "logError": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

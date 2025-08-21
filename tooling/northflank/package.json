@@ -1,0 +1,13 @@
+{
+  "name": "@repo/northflank",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "node setup.js",
+    "deploy": "node deploy.js"
+  },
+  "dependencies": {
+    "consola": "^3.2.3",
+    "@clack/prompts": "^0.7.0"
+  }
+}

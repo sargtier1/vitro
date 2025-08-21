@@ -1,0 +1,25 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --fix src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-auth": "^0.7.5",
+    "@prisma/client": "^5.22.0",
+    "@repo/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.0.0"
+  }
+}
