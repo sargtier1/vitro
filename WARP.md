@@ -98,8 +98,8 @@ pnpm lint
 # Type check all packages
 pnpm type-check
 
-# Run tests
-pnpm test
+# Run tests (not yet implemented)
+# pnpm test
 
 # Biome formatting and linting
 pnpm biome:check      # Check formatting and linting
@@ -110,17 +110,8 @@ pnpm biome:lint:fix   # Fix linting issues only
 
 ### Code Generation
 ```bash
-# Run custom generators
+# Run custom generators (package scaffolding)
 pnpm generate
-```
-
-### Infrastructure
-```bash
-# Setup infrastructure
-pnpm infra:setup
-
-# Deploy infrastructure
-pnpm infra:deploy
 ```
 
 ## Development Workflow
@@ -131,16 +122,16 @@ pnpm infra:deploy
 3. Run `pnpm db:generate` to generate Prisma client
 4. Run `pnpm db:push` or `pnpm db:migrate` to setup database
 
-### Running Individual Tests
-Use Turbo filtering to run tests for specific packages:
+### Testing (Not Yet Implemented)
+Testing setup is not yet configured. When implemented, you would use Turbo filtering:
 ```bash
-# Test specific package
-pnpm --filter @repo/database test
-pnpm --filter @repo/trpc test
+# Test specific package (when configured)
+# pnpm --filter @repo/database test
+# pnpm --filter @repo/trpc test
 
-# Test specific app
-pnpm --filter @repo/api test
-pnpm --filter @repo/web test
+# Test specific app (when configured)
+# pnpm --filter @repo/api test
+# pnpm --filter @repo/web test
 ```
 
 ### Working with Database
@@ -158,6 +149,7 @@ pnpm --filter @repo/web test
 - Uses TanStack Router with file-based routing
 - Route generation via `pnpm --filter @repo/web routes:generate`
 - Routes are defined in `apps/web/src/routes/`
+- Route types are auto-generated and should not be manually edited
 
 ## Important Notes
 
@@ -176,3 +168,15 @@ This project uses **pnpm** with workspace support. Key points:
 - Package manager is locked to `pnpm@10.15.0`
 - Uses a catalog system for dependency version management
 - Workspace filtering is used extensively for running commands on specific packages
+
+## Troubleshooting
+
+### Database Issues
+- If Prisma client is out of sync: `pnpm db:generate`
+- If database schema conflicts: `pnpm db:reset` (destroys data)
+- For production migrations: `pnpm db:deploy`
+
+### Development Issues
+- If types are wrong after schema changes: restart TypeScript server
+- If frontend can't reach API: check `VITE_API_URL` in `.env.local`
+- For CORS issues in development: add origins to `CORS_ORIGINS` in `.env.local`
