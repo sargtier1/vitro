@@ -1,22 +1,9 @@
 import { inferAdditionalFields } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 
-// Get API URL for client-side auth
+// Get API URL for client-side auth with unified deployment support
 function getApiUrl(): string {
-  // Browser environment (Vite) - check for import.meta safely
-  if (typeof globalThis !== 'undefined' && typeof (globalThis as Record<string, unknown>).window !== 'undefined') {
-    try {
-      // @ts-ignore - import.meta is available in Vite but not in all environments
-      if (typeof import.meta !== 'undefined' && import.meta.env) {
-        // @ts-ignore
-        return import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      }
-    } catch (e) {
-      // Fallback if import.meta is not available
-    }
-  }
-
-  // Node.js environment fallback
+  // Node.js environment fallback (for SSR/API context)
   if (typeof process !== 'undefined' && process.env) {
     return process.env.VITE_API_URL || process.env.API_URL || 'http://localhost:3001';
   }

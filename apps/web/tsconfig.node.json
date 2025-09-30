@@ -1,8 +1,0 @@
-{
-  "extends": "@repo/tsconfig/node",
-  "compilerOptions": {
-    "composite": true,
-    "moduleResolution": "bundler"
-  },
-  "include": ["vite.config.ts", "postcss.config.cjs", "tailwind.config.js"]
-}

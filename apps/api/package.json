@@ -2,7 +2,9 @@
   "name": "@repo/api",
   "private": true,
   "scripts": {
-    "build": "nitro build",
+    "build": "pnpm --filter @repo/web build && nitro build",
+    "start": "NODE_ENV=production dotenv -e ../../.env.prod -- node .output/server/index.mjs",
+    "start:prod": "NODE_ENV=production node .output/server/index.mjs",
     "dev": "nitro dev",
     "preview": "nitro preview",
     "typecheck": "nitro prepare && tsc --noEmit",
@@ -15,15 +17,17 @@
     "@repo/logger": "workspace:*",
     "@repo/trpc": "workspace:*",
     "@trpc/server": "^11.0.0",
+    "arktype": "catalog:",
     "better-auth": "^0.7.0",
-    "pg": "^8.12.0",
-    "nitropack": "catalog:",
+    "defu": "^6.1.4",
     "h3": "catalog:",
-    "arktype": "catalog:"
+    "nitropack": "catalog:",
+    "pg": "^8.12.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pg": "^8.11.0",
+    "dotenv-cli": "^7.4.4",
     "typescript": "catalog:",
     "vite": "catalog:"
   }

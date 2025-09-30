@@ -1,242 +1,213 @@
-# Vitro 🚀
+# Full-Stack TypeScript Monorepo
 
-> **Vitro** = **Vite** + **Nitro** + **Turbo** - A lightning-fast full-stack TypeScript framework for micro cloud applications.
+A modern full-stack application built with TypeScript, featuring unified deployment architecture where a single Nitro server serves both the React SPA and tRPC API endpoints.
 
-Modern full-stack monorepo with **Vite** frontend, **Nitro** backend, **Prisma** database, and **Better Auth** authentication. Built for rapid development and seamless deployment.
+## Architecture
 
-## ✨ Key Features
+**Unified Deployment**: One server handles both frontend and backend, eliminating CORS issues and simplifying deployment.
 
-- ⚡ **Lightning Fast** - Vite HMR + Nitro auto-reload + Turbo builds
-- 🔒 **End-to-End Type Safety** - TypeScript everywhere with tRPC
-- 🔐 **Production-Ready Auth** - Better Auth with secure sessions
-- 📊 **Dual API Architecture** - tRPC + GraphQL for maximum flexibility
-- 🎨 **Modern UI Stack** - Shadcn/UI + Tailwind CSS + TanStack Router
-- 🗃️ **Type-Safe Database** - Prisma ORM with PostgreSQL
-- 🛠️ **Premium DX** - Hot reload, code generation, unified environment
-- 📦 **Optimized Monorepo** - Turborepo + pnpm for blazing builds
+- **Backend**: Nitro server with tRPC for type-safe APIs
+- **Frontend**: React SPA with TanStack Router
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Better Auth with session-based security
+- **Styling**: TailwindCSS with Radix UI components
+- **Code Quality**: Biome for linting and formatting
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 pnpm install
 
-# 2. Set up environment variables
-cp .env.example .env
-# Edit .env with your database URL and auth secret
+# Set up environment
+cp .env.example .env.local
 
-# 3. Set up database
-pnpm db:push
+# Generate database client
 pnpm db:generate
 
-# 4. Start development servers
+# Setup database
+pnpm db:push
+
+# Start development
 pnpm dev
 ```
 
-**Access your application:**
-- 🌐 **Frontend**: http://localhost:5173
-- ⚡ **API**: http://localhost:3001
-- 🗃️ **Database Studio**: `pnpm db:studio`
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-vitro-supercharged/
-├── apps/
-│   ├── web/                    # 🌐 Vite + React frontend
-│   └── api/                    # ⚡ Nitro backend server
-├── packages/
-│   ├── auth/                   # 🔐 Better Auth configuration
-│   ├── database/               # 🗃️ Prisma schema & client
-│   ├── trpc/                   # 🔄 tRPC routers & procedures
-│   └── ui/                     # 🎨 Shared UI components (Shadcn/UI)
-├── tooling/
-│   ├── biome/                  # 🛠️ Code quality (linting & formatting)
-│   ├── generator/              # 📦 Package scaffolding tool
-│   └── tsconfig/               # ⚙️ Shared TypeScript configs
-└── docs/                       # 📚 Documentation
+apps/
+├── api/              # Nitro API server (serves SPA + API)
+└── web/              # React frontend application
+
+packages/
+├── auth/             # Better Auth configuration
+├── database/         # Prisma schema and client  
+├── logger/           # Structured logging utilities
+├── trpc/             # tRPC router and type definitions
+└── ui/               # Shared UI components (Shadcn/UI)
+
+tooling/
+├── biome/            # Code formatting and linting config
+├── generator/        # Package scaffolding tool
+└── tsconfig/         # Shared TypeScript configurations
 ```
 
-## 🛠️ Tech Stack
+## Development Commands
 
-### Frontend
-- **⚡ Vite** - Lightning fast build tool
-- **⚛️ React 18** - UI framework with TypeScript
-- **🧭 TanStack Router** - File-based routing
-- **🔄 TanStack Query** - Server state management
-- **🎨 Tailwind CSS** - Utility-first styling
-- **🧩 Shadcn/UI** - Beautiful component library
-
-### Backend  
-- **🚀 Nitro** - Universal JavaScript server
-- **🌐 H3** - HTTP framework
-- **🔄 tRPC v11** - Type-safe API layer
-- **🔐 Better Auth** - Modern authentication system
-- **✅ ArkType** - Runtime validation
-
-### Database & Auth
-- **🐘 PostgreSQL** - Robust relational database
-- **🔷 Prisma ORM** - Type-safe database client
-- **👤 Session Management** - Secure user sessions
-
-### Development Tools
-- **🏗️ Turborepo** - High-performance monorepo build system
-- **📦 pnpm** - Fast, disk space efficient package manager
-- **🛠️ Biome** - Ultra-fast linting, formatting, and import organization
-- **📝 TypeScript** - End-to-end type safety
-- **🔧 VS Code** - Integrated development environment
-
-## 📚 Documentation
-
-**[📖 Complete Documentation](./docs/)** - Setup guides, architecture, and best practices
-
-### Core Guides
-- **[🚀 Development Workflow](./docs/development.md)** - Local setup and commands
-- **[🏗️ Infrastructure & Deployment](./docs/infrastructure.md)** - Hosting and deployment
-- **[⚙️ CI/CD Workflows](./docs/cicd.md)** - GitHub Actions and automation
-
-### Package Documentation
-- **[Authentication](./packages/auth/README.md)** - Better Auth setup and usage
-- **[Database](./packages/database/README.md)** - Prisma schema and operations
-- **[tRPC API](./packages/trpc/README.md)** - Type-safe API procedures
-- **[UI Components](./packages/ui/README.md)** - Shadcn/UI component library
-
-### Tooling Documentation  
-- **[Code Quality](./tooling/biome/README.md)** - Biome configuration
-- **[Package Generator](./tooling/generator/README.md)** - Creating new packages
-- **[TypeScript Config](./tooling/tsconfig/README.md)** - Shared TypeScript settings
-
-## 🏃‍♂️ Available Scripts
-
-### Development
+### Core Development
 ```bash
-pnpm dev                        # Start all development servers
-pnpm --filter @repo/web dev     # Frontend only (port 5173)
-pnpm --filter @repo/api dev     # Backend only (port 3001)
-```
-
-### Building
-```bash
-pnpm build                      # Build all packages and apps
-pnpm type-check                 # Run TypeScript checks across monorepo
+pnpm dev              # Start all apps in development
+pnpm dev:api          # API server only (port 3001)
+pnpm dev:web          # Frontend only (port 5173)
+pnpm build            # Build all apps for production
+pnpm start            # Start production server
 ```
 
 ### Database Operations
 ```bash
-pnpm db:generate                # Generate Prisma client
-pnpm db:push                    # Push schema changes to database
-pnpm db:migrate                 # Run database migrations
-pnpm db:studio                  # Open Prisma Studio GUI
-pnpm db:seed                    # Seed database with sample data
+pnpm db:generate      # Generate Prisma client
+pnpm db:push          # Push schema to database (dev)
+pnpm db:migrate       # Create migration (prod)
+pnpm db:studio        # Open Prisma Studio GUI
+pnpm db:reset         # Reset database
 ```
 
-### Code Quality (Biome)
+### Code Quality
 ```bash
-pnpm biome:check                # Check code quality issues
-pnpm biome:fix                  # Auto-fix code quality issues
-pnpm lint                       # Lint all packages
+pnpm lint             # Lint all packages
+pnpm type-check       # TypeScript type checking
+pnpm test             # Run tests
+pnpm biome:check      # Check formatting/linting
+pnpm biome:fix        # Fix formatting/linting issues
 ```
 
-**VS Code Setup**: Install `biomejs.biome` extension for auto-formatting on save, import organization, and real-time linting.
+## Environment Setup
 
-### Package Generation
-```bash
-pnpm generate                   # Interactive package generator
-```
-
-## 💻 Development
-
-```bash
-# Quick setup
-cp .env.example .env    # Configure environment
-pnpm db:push           # Setup database
-pnpm dev               # Start development servers
-```
-
-**[📖 Development Guide](./docs/development.md)** - Detailed workflow and best practices
-
-## 🚀 API Architecture
-
-**Dual API Design:**
-- **tRPC** - Type-safe client-server communication
-- **GraphQL** - Flexible queries with auto-generated CRUD
-
-```typescript
-// Type-safe tRPC calls
-const user = await trpc.users.profile.query();
-const posts = await trpc.posts.list.query();
-```
-
-**[📖 API Documentation](./docs/)** - Complete tRPC and GraphQL guides
-
-## 🔐 Authentication
-
-**Better Auth** with email/password, secure sessions, and protected routes.
-
-```typescript
-import { authActions } from '@repo/auth/client';
-const result = await authActions.signIn({ email, password });
-```
-
-**[📖 Auth Guide](./packages/auth/README.md)** - Setup, usage, and security patterns
-
-## 🗃️ Database
-
-**Prisma ORM** with PostgreSQL, featuring User management, Auth sessions, and content models.
-
-**[📖 Database Guide](./packages/database/README.md)** - Schema, relationships, and operations
-
-## 🎨 UI Components
-
-**Shadcn/UI** components with **Tailwind CSS** styling and **TanStack Router** for navigation.
-
-```bash
-npx shadcn@latest add dialog  # Add new components
-```
-
-**[📖 UI Guide](./packages/ui/README.md)** - Component library and patterns
-
-## 🌍 Environment Setup
-
-**Turbo loose mode** - single `.env` file for all packages.
+### Required Environment Variables
 
 ```env
-# Required
-DATABASE_URL="postgresql://user:pass@localhost:5432/mydb"
-BETTER_AUTH_SECRET="your-super-secret-32-char-minimum-key"
+# Database
+DATABASE_URL="postgresql://user:pass@localhost:5432/dbname"
+
+# Authentication
+BETTER_AUTH_SECRET="your-32-char-secret-key-here"
+
+# Development API URL (frontend proxy)
+VITE_API_URL=http://localhost:3001
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
 ```
 
-**[📖 Environment Guide](./docs/environment.md)** - Complete configuration reference
+### Development vs Production
 
-## 🚀 Deployment
+**Development**: Frontend (port 5173) proxies API calls to backend (port 3001)
+**Production**: Single server serves both frontend and API on same port
+
+## Key Features
+
+### Type Safety
+- End-to-end type safety with tRPC
+- Shared types between frontend and backend
+- Runtime validation with ArkType schemas
+
+### Authentication
+- Session-based authentication with Better Auth
+- HTTP-only secure cookies
+- Role-based access control
+- Automatic session renewal
+
+### Database
+- PostgreSQL with Prisma ORM
+- Type-safe database operations
+- Automatic migration system
+- Better Auth compatible schema
+
+### UI Components
+- Shadcn/UI component library
+- Radix UI primitives for accessibility
+- TailwindCSS for styling
+- Dark mode ready
+
+## Package Details
+
+### Apps
+
+| Package | Description | Port |
+|---------|-------------|------|
+| `@repo/api` | Nitro API server with unified deployment | 3001 |
+| `@repo/web` | React SPA with TanStack Router | 5173 |
+
+### Packages
+
+| Package | Description |
+|---------|-------------|
+| `@repo/auth` | Better Auth configuration and React hooks |
+| `@repo/database` | Prisma schema, client, and database utilities |
+| `@repo/logger` | Structured logging with environment detection |
+| `@repo/trpc` | tRPC router, procedures, and client setup |
+| `@repo/ui` | Shared UI components with Shadcn/UI |
+
+### Tooling
+
+| Package | Description |
+|---------|-------------|
+| `@repo/biome-config` | Code formatting and linting configuration |
+| `@repo/generator` | Interactive package scaffolding tool |
+| `@repo/tsconfig` | Shared TypeScript configurations |
+
+## Deployment
+
+The application uses **unified deployment** where the API server serves both the backend API and frontend static files:
 
 ```bash
-pnpm build  # Creates production builds
-# Frontend: ./apps/web/dist/
-# Backend: ./apps/api/.output/
+# Build for production
+pnpm build
+
+# Start production server (serves both API and SPA)
+pnpm start
 ```
 
-**Recommended Platforms:**
-- **Full-stack**: Railway, Render
-- **Frontend**: Vercel, Netlify
-- **Database**: Neon, Supabase
+**Deployment targets**:
+- Vercel (recommended)
+- Railway
+- Netlify
+- Any Node.js hosting
+- Docker containers
 
-**[📖 Deployment Guide](./docs/infrastructure.md)** - Platform-specific instructions
+## Tech Stack
 
-## 🤝 Contributing
+- **Runtime**: Node.js 18+
+- **Package Manager**: pnpm 10.15.0 (required)
+- **Framework**: Nitro (universal server)
+- **Frontend**: React 18 + TypeScript
+- **Routing**: TanStack Router (frontend), file-based (API)
+- **Database**: PostgreSQL + Prisma ORM
+- **Authentication**: Better Auth
+- **API**: tRPC with ArkType validation
+- **Styling**: TailwindCSS + Shadcn/UI
+- **Code Quality**: Biome
+- **Build System**: Turbo (monorepo orchestration)
 
+## Scripts Reference
+
+### Workspace Management
 ```bash
-git clone <your-fork>
-pnpm install && cp .env.example .env
-pnpm db:push && pnpm dev
+pnpm --filter @repo/api <command>     # Target specific app
+pnpm --filter @repo/web <command>     # Target frontend
+pnpm generate                         # Scaffold new packages
 ```
 
-**[📖 Contributing Guide](./docs/development.md)** - Development setup and guidelines
+### Database Management
+```bash
+pnpm db:studio                        # Visual database editor
+pnpm db:seed                          # Populate with sample data
+pnpm db:deploy                        # Deploy migrations to production
+```
 
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-**Built with ❤️ using modern TypeScript, React, and Node.js technologies**
+### Infrastructure
+```bash
+pnpm infra:setup                      # Setup infrastructure
+pnpm infra:deploy                     # Deploy infrastructure
+```

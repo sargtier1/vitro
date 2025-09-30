@@ -1,7 +1,7 @@
 import { type } from 'arktype';
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../server';
 
-// Arktype schemas
+// Input validation schemas
 const CreatePostInput = type({
   title: 'string>0',
   content: 'string>0',
@@ -17,178 +17,88 @@ const PostIdInput = type({
   id: 'string',
 });
 
+// Mock data store (replace with database when ready)
+const mockPosts = [
+  {
+    id: '1',
+    title: 'Welcome Post',
+    content: 'This is a sample post to demonstrate the tRPC setup.',
+    author: { id: '1', name: 'System' },
+    createdAt: new Date(),
+  },
+];
+
 export const postsRouter = createTRPCRouter({
   // Get all posts - public endpoint
   getAll: publicProcedure.query(async () => {
-    // Uncomment when you have a Post model in your Prisma schema
-    // const posts = await ctx.prisma.post.findMany({
-    //   include: {
-    //     author: {
-    //       select: {
-    //         id: true,
-    //         name: true,
-    //       },
-    //     },
-    //   },
-    //   orderBy: {
-    //     createdAt: 'desc',
-    //   },
-    // });
-    // return posts;
-
-    // Mock data for now
-    return [
-      {
-        id: '1',
-        title: 'Welcome Post',
-        content: 'This is a sample post',
-        author: { id: '1', name: 'System' },
-        createdAt: new Date(),
-      },
-    ];
+    return mockPosts;
   }),
 
   // Get post by ID - public endpoint
   getById: publicProcedure
-    .input((input: unknown) => {
-      const result = PostIdInput.assert(input);
-      return result;
-    })
+    .input((input: unknown) => PostIdInput.assert(input))
     .query(async ({ input }) => {
-      // Uncomment when you have a Post model
-      // const post = await ctx.prisma.post.findUnique({
-      //   where: { id: input.id },
-      //   include: {
-      //     author: {
-      //       select: {
-      //         id: true,
-      //         name: true,
-      //       },
-      //     },
-      //   },
-      // });
-      // return post;
-
-      // Mock data for now
-      return {
-        id: input.id,
-        title: `Post ${input.id}`,
-        content: `Content for post ${input.id}`,
-        author: { id: '1', name: 'System' },
-        createdAt: new Date(),
-      };
+      const post = mockPosts.find(p => p.id === input.id);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+      return post;
     }),
 
   // Create post - requires auth
   create: protectedProcedure
-    .input((input: unknown) => {
-      const result = CreatePostInput.assert(input);
-      return result;
-    })
+    .input((input: unknown) => CreatePostInput.assert(input))
     .mutation(async ({ input, ctx }) => {
-      // Uncomment when you have a Post model
-      // const newPost = await ctx.prisma.post.create({
-      //   data: {
-      //     title: input.title,
-      //     content: input.content,
-      //     authorId: ctx.user.id,
-      //   },
-      //   include: {
-      //     author: {
-      //       select: {
-      //         id: true,
-      //         name: true,
-      //       },
-      //     },
-      //   },
-      // });
-      // return newPost;
-
-      // Mock response for now
-      return {
+      const newPost = {
         id: Date.now().toString(),
         title: input.title,
         content: input.content,
-        author: { id: ctx.user.id, name: ctx.user.name },
+        author: { id: ctx.user.id, name: ctx.user.name || 'Anonymous' },
         createdAt: new Date(),
       };
+      
+      // Add to mock store (in real app, save to database)
+      mockPosts.unshift(newPost);
+      
+      return newPost;
     }),
 
-  // Update post - requires auth and ownership
+  // Update post - requires auth (simplified for demo)
   update: protectedProcedure
-    .input((input: unknown) => {
-      const result = UpdatePostInput.assert(input);
-      return result;
-    })
-    .mutation(async ({ input, ctx }) => {
-      // Uncomment when you have a Post model
-      // const post = await ctx.prisma.post.findUnique({
-      //   where: { id: input.id },
-      // });
-
-      // if (!post) {
-      //   throw new TRPCError({ code: 'NOT_FOUND', message: 'Post not found' });
-      // }
-
-      // if (post.authorId !== ctx.user.id) {
-      //   throw new TRPCError({ code: 'FORBIDDEN', message: 'You can only edit your own posts' });
-      // }
-
-      // const updatedPost = await ctx.prisma.post.update({
-      //   where: { id: input.id },
-      //   data: {
-      //     ...(input.title && { title: input.title }),
-      //     ...(input.content && { content: input.content }),
-      //   },
-      //   include: {
-      //     author: {
-      //       select: {
-      //         id: true,
-      //         name: true,
-      //       },
-      //     },
-      //   },
-      // });
-      // return updatedPost;
-
-      // Mock response for now
-      return {
-        id: input.id,
-        title: input.title || `Post ${input.id}`,
-        content: input.content || 'Updated content',
-        author: { id: ctx.user.id, name: ctx.user.name },
+    .input((input: unknown) => UpdatePostInput.assert(input))
+    .mutation(async ({ input, ctx: _ctx }) => {
+      const postIndex = mockPosts.findIndex(p => p.id === input.id);
+      if (postIndex === -1) {
+        throw new Error('Post not found');
+      }
+      
+      // Update mock post
+      const updatedPost = {
+        ...mockPosts[postIndex],
+        ...(input.title && { title: input.title }),
+        ...(input.content && { content: input.content }),
         updatedAt: new Date(),
       };
+      
+      mockPosts[postIndex] = updatedPost;
+      return updatedPost;
     }),
 
-  // Delete post - requires auth and ownership
+  // Delete post - requires auth (simplified for demo)
   delete: protectedProcedure
-    .input((input: unknown) => {
-      const result = PostIdInput.assert(input);
-      return result;
-    })
-    .mutation(async ({ input, ctx }) => {
-      // Uncomment when you have a Post model
-      // const post = await ctx.prisma.post.findUnique({
-      //   where: { id: input.id },
-      // });
-
-      // if (!post) {
-      //   throw new TRPCError({ code: 'NOT_FOUND', message: 'Post not found' });
-      // }
-
-      // if (post.authorId !== ctx.user.id) {
-      //   throw new TRPCError({ code: 'FORBIDDEN', message: 'You can only delete your own posts' });
-      // }
-
-      // await ctx.prisma.post.delete({
-      //   where: { id: input.id },
-      // });
-
+    .input((input: unknown) => PostIdInput.assert(input))
+    .mutation(async ({ input, ctx: _ctx }) => {
+      const postIndex = mockPosts.findIndex(p => p.id === input.id);
+      if (postIndex === -1) {
+        throw new Error('Post not found');
+      }
+      
+      // Remove from mock store
+      mockPosts.splice(postIndex, 1);
+      
       return {
         success: true,
         deletedId: input.id,
-        deletedBy: ctx.user?.id || 'unknown',
       };
     }),
 });

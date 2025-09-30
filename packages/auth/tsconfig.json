@@ -2,7 +2,6 @@
   "extends": "@repo/tsconfig/node",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "moduleResolution": "bundler",
     "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist"]

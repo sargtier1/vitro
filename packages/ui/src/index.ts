@@ -3,6 +3,7 @@ import './styles/globals.css';
 
 // Export utilities
 export * from './lib/utils';
+export { cn } from './lib/utils';
 
 // Export UI components
 export { Alert, AlertDescription, AlertTitle } from './components/ui/alert';

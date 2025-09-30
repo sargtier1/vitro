@@ -1,7 +1,8 @@
+import { dbLogger } from '@repo/logger';
 import { prisma } from '../src/index.js';
 
 async function main() {
-  console.log('Starting database seed...');
+  dbLogger.startup('Starting database seed...');
 
   try {
     // Add your seed data here
@@ -15,16 +16,16 @@ async function main() {
       },
     });
 
-    console.log('Seed completed successfully:', user);
+    dbLogger.success(`Seed completed successfully: ${JSON.stringify(user, null, 2)}`);
   } catch (error) {
-    console.error('Seed failed:', error);
+    dbLogger.error(`Seed failed: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }
 
 main()
   .catch((e) => {
-    console.error('Unhandled error during seed:', e);
+    dbLogger.error(`Unhandled error during seed: ${e instanceof Error ? e.message : String(e)}`);
     process.exit(1);
   })
   .finally(async () => {

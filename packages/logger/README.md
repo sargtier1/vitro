@@ -7,9 +7,10 @@ A simple logging package using Consola with enhanced features for TypeScript pro
 - **Multiple log levels**: Debug, Info, Warn, Error, Success, Env, Startup
 - **Service-scoped logging**: Create loggers for specific services
 - **Environment-aware**: Different behavior in development vs production
+- **JSON output in production**: Automatically outputs structured JSON logs in production environments (including Railway)
 - **Secure environment logging**: Automatically redacts sensitive values
-- **Cross-platform**: Works in both Node.js and browser environments
-- **Colored output**: Color-coded log levels (Node.js only)
+- **Cross-platform**: Works in both Node.js and browser environments with automatic environment detection
+- **Colored output**: Color-coded log levels (development only)
 - **Configurable**: Customizable log levels and features
 
 ## Installation
@@ -111,6 +112,7 @@ interface LoggerConfig {
   enableEnvLogging?: boolean;     // Enable environment variable logging
   enableStartupLogging?: boolean; // Enable startup logging
   minLevel?: LogLevelType;        // Minimum log level to display
+  useJsonOutput?: boolean;        // Force JSON output (auto-detected in production)
 }
 ```
 
@@ -118,6 +120,47 @@ interface LoggerConfig {
 
 - `NODE_ENV`: Controls default logging behavior
 - `LOG_ENV`: Force enable environment logging (set to 'true')
+- `RAILWAY_ENVIRONMENT` or `RAILWAY_PROJECT_ID`: Automatically detected for Railway deployments
+
+## JSON Output
+
+The logger automatically switches to JSON output in production environments for better log parsing and monitoring:
+
+### Development Output (Formatted)
+```
+19:30:25 [server] ● INFO Server started on port 3000
+19:30:25 [db] ✓ SUCCESS Database connection established
+```
+
+### Production Output (JSON)
+```json
+{"timestamp":"2025-09-30T00:30:25.123Z","service":"server","level":"info","message":"Server started on port 3000"}
+{"timestamp":"2025-09-30T00:30:25.456Z","service":"db","level":"success","message":"Database connection established"}
+```
+
+### Railway Detection
+The logger automatically detects Railway environments and switches to JSON output even if `NODE_ENV` is not set to 'production'.
+
+## Browser Compatibility
+
+The logger works seamlessly in both Node.js and browser environments:
+
+### Node.js Environment
+- Full feature set including environment variable detection
+- JSON output in production environments
+- Environment variable logging with security redaction
+
+### Browser Environment
+- Core logging functionality (info, warn, error, success, debug)
+- Automatic fallback to development mode (formatted output)
+- Environment variable logging is safely disabled
+- No `process.env` dependencies
+
+```typescript
+// Works in both environments
+const logger = createLogger('my-app');
+logger.info('This works everywhere!');
+```
 
 ## Output Format
 

@@ -1,6 +1,7 @@
-import { apiLogger } from '@repo/logger';
 import { TRPCError, initTRPC } from '@trpc/server';
+import { apiLogger } from '@repo/logger';
 import type { Context } from './context';
+import { UserRole, type UserWithRole } from './types';
 
 const t = initTRPC.context<Context>().create();
 
@@ -61,7 +62,8 @@ const adminGuard = t.middleware(({ ctx, next }) => {
     apiLogger.warn('Admin access attempt without authentication');
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
-  if (ctx.user.role !== 'admin') {
+  const userWithRole = ctx.user as UserWithRole;
+  if (userWithRole.role !== UserRole.ADMIN) {
     apiLogger.warn(`Non-admin user ${ctx.user.id} attempted admin access`);
     throw new TRPCError({
       code: 'FORBIDDEN',

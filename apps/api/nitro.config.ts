@@ -20,32 +20,26 @@ export default defineNitroConfig({
   srcDir: 'src',
   logLevel: process.env.NODE_ENV === 'development' ? 3 : 1,
 
-  devServer: {
-    port: Number.parseInt(process.env.PORT || process.env.NITRO_PORT || '3001'),
-    host: process.env.NITRO_HOST || 'localhost',
-  },
-
-  // Also ensure runtime port is set
-  runtimeConfig: {
-    nitro: {
-      port: Number.parseInt(process.env.PORT || process.env.NITRO_PORT || '3001'),
+  // Serve static files from frontend build
+  publicAssets: [
+    {
+      baseURL: '/',
+      dir: resolve(__dirname, '../web/dist'),
+      maxAge: 60 * 60 * 24 * 365, // 1 year cache for production
     },
+  ],
+
+  devServer: {
+    watch: [],
   },
 
-  devtools: { enabled: false },
+  // Set port in runtimeConfig instead
+  runtimeConfig: {
+    port: process.env.PORT || '3001',
+  },
+
   experimental: {
     wasm: false,
   },
 
-  routeRules: {
-    '/api/**': {
-      cors: true,
-      headers: {
-        'Access-Control-Allow-Origin': 'http://localhost:5173',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie, X-Requested-With',
-      },
-    },
-  },
 });

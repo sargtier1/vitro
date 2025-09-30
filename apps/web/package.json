@@ -20,8 +20,10 @@
     "@repo/logger": "workspace:*",
     "@repo/trpc": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-query": "^5.59.0",
+    "@tanstack/react-router": "^1.132.25",
     "@tanstack/router-devtools": "catalog:",
+    "@trpc/client": "^11.6.0",
     "better-auth": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"

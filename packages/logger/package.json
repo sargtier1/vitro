@@ -2,27 +2,27 @@
   "name": "@repo/logger",
   "version": "0.1.0",
   "description": "Simple logging package using Consola",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     }
   },
   "files": ["dist"],
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --watch"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "consola": "^3.2.3"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "unbuild": "^2.0.0",
     "typescript": "^5.0.0"
   },
   "publishConfig": {

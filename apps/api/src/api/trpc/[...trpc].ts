@@ -1,46 +1,16 @@
-import { appRouter, createContext } from '@repo/trpc';
+import { appRouter, createContext } from '@repo/trpc/server';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import {
   defineEventHandler,
-  getHeader,
   getHeaders,
   getMethod,
   getRequestURL,
   readBody,
-  setHeader,
 } from 'h3';
 import { requireAuth } from '../../utils/require-auth';
 
 export default defineEventHandler(async (event) => {
   const url = getRequestURL(event);
-
-  // Handle CORS preflight OPTIONS requests
-  if (getMethod(event) === 'OPTIONS') {
-    const origin = getHeader(event, 'origin');
-    const allowedOrigins = [
-      process.env.WEB_URL || 'http://localhost:5173',
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-    ];
-
-    // Set CORS headers for OPTIONS preflight
-    if (origin && allowedOrigins.includes(origin)) {
-      setHeader(event, 'Access-Control-Allow-Origin', origin);
-    } else {
-      setHeader(event, 'Access-Control-Allow-Origin', 'http://localhost:5173');
-    }
-
-    setHeader(event, 'Access-Control-Allow-Credentials', 'true');
-    setHeader(event, 'Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    setHeader(
-      event,
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, Cookie, X-Requested-With'
-    );
-    setHeader(event, 'Access-Control-Max-Age', '86400'); // 24 hours
-
-    return new Response(null, { status: 204 });
-  }
 
   return fetchRequestHandler({
     endpoint: '/api/trpc',
@@ -53,7 +23,8 @@ export default defineEventHandler(async (event) => {
           : undefined,
     }),
     router: appRouter,
-    onRequest: [requireAuth], // Auth middleware (optional)
-    createContext: ({ req }) => createContext({ req }),
+    createContext: ({ req, resHeaders, info }) => {
+      return createContext({ req, resHeaders, info } as any);
+    },
   });
 });

@@ -27,6 +27,7 @@ interface LoggerConfig {
   enableEnvLogging?: boolean;
   enableStartupLogging?: boolean;
   minLevel?: LogLevelType;
+  useJsonOutput?: boolean;
 }
 
 function formatTimestamp(): string {
@@ -57,7 +58,9 @@ function getIcon(level: LogLevelType): string {
 }
 
 function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
+  return typeof globalThis !== 'undefined' && 
+         typeof (globalThis as any).window !== 'undefined' && 
+         typeof (globalThis as any).document !== 'undefined';
 }
 
 function getColor(level: LogLevelType): string {
@@ -109,72 +112,147 @@ function getLevelName(level: LogLevelType): string {
 
 // Environment detection helpers
 function getLoggerConfig(): LoggerConfig {
-  const env = process.env.NODE_ENV || 'development';
+  // Check if we're in Node.js environment
+  const isNode = typeof process !== 'undefined' && process.env;
+  
+  const env = isNode ? (process.env.NODE_ENV || 'development') : 'development';
   const isDevelopment = env === 'development';
+  
+  // Detect Railway or other production environments (Node.js only)
+  const isProduction = isNode && (
+    env === 'production' || 
+    process.env.RAILWAY_ENVIRONMENT || 
+    process.env.RAILWAY_PROJECT_ID
+  );
 
   return {
-    enableDebug: true, // Always enable debug in development setup
-    enableEnvLogging: isDevelopment || process.env.LOG_ENV === 'true',
+    enableDebug: isDevelopment,
+    enableEnvLogging: isNode && (isDevelopment || process.env.LOG_ENV === 'true'),
     enableStartupLogging: true,
     minLevel: isDevelopment ? LogLevel.Debug : LogLevel.Info,
+    useJsonOutput: !!isProduction, // Use JSON output in production (Node.js only)
+  };
+}
+
+// Create JSON reporter for production environments
+function createJsonReporter(service: string, loggerConfig: LoggerConfig) {
+  return {
+    log: (logObj: any) => {
+      let level: LogLevelType;
+
+      // Map consola levels to our custom levels
+      if (logObj.type === 'info' || logObj.type === 'log') {
+        level = LogLevel.Info;
+      } else if (logObj.type === 'warn') {
+        level = LogLevel.Warn;
+      } else if (logObj.type === 'error') {
+        level = LogLevel.Error;
+      } else if (logObj.type === 'success') {
+        level = LogLevel.Success;
+      } else if (logObj.type === 'debug') {
+        level = LogLevel.Debug;
+      } else {
+        level = LogLevel.Info;
+      }
+
+      // Check if this log level should be shown
+      if (level < loggerConfig.minLevel!) {
+        return;
+      }
+
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        service,
+        level: getLevelName(level).toLowerCase(),
+        message: logObj.args.join(' '),
+        // Add any additional metadata
+        ...(logObj.extra && { extra: logObj.extra }),
+      };
+
+      console.log(JSON.stringify(logEntry));
+    },
+  };
+}
+
+// Create formatted reporter for development environments
+function createFormattedReporter(service: string, loggerConfig: LoggerConfig) {
+  return {
+    log: (logObj: any) => {
+      const timestamp = formatTimestamp();
+      let level: LogLevelType;
+
+      // Map consola levels to our custom levels
+      if (logObj.type === 'info' || logObj.type === 'log') {
+        level = LogLevel.Info;
+      } else if (logObj.type === 'warn') {
+        level = LogLevel.Warn;
+      } else if (logObj.type === 'error') {
+        level = LogLevel.Error;
+      } else if (logObj.type === 'success') {
+        level = LogLevel.Success;
+      } else if (logObj.type === 'debug') {
+        level = LogLevel.Debug;
+      } else {
+        level = LogLevel.Info;
+      }
+
+      // Check if this log level should be shown
+      if (level < loggerConfig.minLevel!) {
+        return;
+      }
+
+      const icon = getIcon(level);
+      const color = getColor(level);
+      const reset = isBrowser() ? '' : '\x1b[0m';
+      const levelName = getLevelName(level);
+
+      const formatted = `${timestamp} [${service}] ${color}${icon}${reset} ${levelName} ${logObj.args.join(' ')}`;
+      console.log(formatted);
+    },
   };
 }
 
 export function createLogger(service: string, config?: Partial<LoggerConfig>): CustomLogger {
   const loggerConfig = { ...getLoggerConfig(), ...config };
 
+  // Choose reporter based on environment
+  const reporter = loggerConfig.useJsonOutput 
+    ? createJsonReporter(service, loggerConfig)
+    : createFormattedReporter(service, loggerConfig);
+
+  // Ensure process.env exists for Consola (browser compatibility)
+  if (typeof globalThis.process === 'undefined') {
+    (globalThis as any).process = { env: {} };
+  }
+
   const consola = createConsola({
-    reporters: [
-      {
-        log: (logObj) => {
-          const timestamp = formatTimestamp();
-          let level: LogLevelType;
-
-          // Map consola levels to our custom levels
-          if (logObj.type === 'info' || logObj.type === 'log') {
-            level = LogLevel.Info;
-          } else if (logObj.type === 'warn') {
-            level = LogLevel.Warn;
-          } else if (logObj.type === 'error') {
-            level = LogLevel.Error;
-          } else if (logObj.type === 'success') {
-            level = LogLevel.Success;
-          } else if (logObj.type === 'debug') {
-            level = LogLevel.Debug;
-          } else {
-            level = LogLevel.Info;
-          }
-
-          // Check if this log level should be shown
-          if (level < loggerConfig.minLevel!) {
-            return;
-          }
-
-          const icon = getIcon(level);
-          const color = getColor(level);
-          const reset = isBrowser() ? '' : '\x1b[0m';
-          const levelName = getLevelName(level);
-
-          const formatted = `${timestamp} [${service}] ${color}${icon}${reset} ${levelName} ${logObj.args.join(' ')}`;
-          console.log(formatted);
-        },
-      },
-    ],
+    reporters: [reporter],
   });
 
-  const logMessage = (level: LogLevelType, message: string) => {
+  const logMessage = (level: LogLevelType, message: string, extra?: any) => {
     if (level < loggerConfig.minLevel!) {
       return;
     }
 
-    const timestamp = formatTimestamp();
-    const icon = getIcon(level);
-    const color = getColor(level);
-    const reset = isBrowser() ? '' : '\x1b[0m';
-    const levelName = getLevelName(level);
+    if (loggerConfig.useJsonOutput) {
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        service,
+        level: getLevelName(level).toLowerCase(),
+        message,
+        ...(extra && { extra }),
+      };
+      console.log(JSON.stringify(logEntry));
+    } else {
+      const timestamp = formatTimestamp();
+      const icon = getIcon(level);
+      const color = getColor(level);
+      const reset = isBrowser() ? '' : '\x1b[0m';
+      const levelName = getLevelName(level);
 
-    const formatted = `${timestamp} [${service}] ${color}${icon}${reset} ${levelName} ${message}`;
-    console.log(formatted);
+      const formatted = `${timestamp} [${service}] ${color}${icon}${reset} ${levelName} ${message}`;
+      console.log(formatted);
+    }
   };
 
   return {
@@ -184,15 +262,7 @@ export function createLogger(service: string, config?: Partial<LoggerConfig>): C
     success: (message: string) => consola.success(message),
     debug: (message: string) => {
       if (loggerConfig.enableDebug) {
-        // Force debug logs to always show in development
-        const timestamp = formatTimestamp();
-        const icon = getIcon(LogLevel.Debug);
-        const color = getColor(LogLevel.Debug);
-        const reset = isBrowser() ? '' : '\x1b[0m';
-        const levelName = getLevelName(LogLevel.Debug);
-
-        const formatted = `${timestamp} [${service}] ${color}${icon}${reset} ${levelName} ${message}`;
-        console.log(formatted);
+        logMessage(LogLevel.Debug, message);
       }
     },
     env: (envName: string, value?: string | boolean | null) => {
@@ -217,7 +287,7 @@ export function createLogger(service: string, config?: Partial<LoggerConfig>): C
             displayValue = value;
           }
         }
-        logMessage(LogLevel.Env, `${envName}: ${displayValue}`);
+        logMessage(LogLevel.Env, `${envName}: ${displayValue}`, { envName, value: displayValue });
       }
     },
     startup: (message: string) => {
@@ -242,6 +312,12 @@ export const devLogger = createLogger('dev', {
 
 // Utility function for environment logging
 export function logEnvironment(logger: CustomLogger = devLogger) {
+  // Only log environment variables in Node.js
+  if (typeof process === 'undefined' || !process.env) {
+    logger.startup('Environment Configuration (Browser - skipping env vars)');
+    return;
+  }
+
   const requiredEnvs = [
     'NODE_ENV',
     'DATABASE_URL',

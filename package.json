@@ -1,8 +1,12 @@
 {
   "name": "my-turborepo",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo build",
+    "start": "turbo start --filter @repo/api",
+    "start:prod": "node scripts/start-production.js",
+    "start:simple": "pnpm --filter @repo/api start:prod",
     "dev": "turbo dev",
     "dev:start": "node dev-start.js",
     "dev:verbose": "DEBUG=* turbo dev",
@@ -25,9 +29,7 @@
     "db:deploy": "turbo db:deploy",
     "db:studio": "pnpm --filter @repo/db db:studio",
     "db:reset": "pnpm --filter @repo/db db:reset",
-    "db:seed": "pnpm --filter @repo/db db:seed",
-    "infra:setup": "pnpm --filter @repo/northflank run setup",
-    "infra:deploy": "pnpm --filter @repo/northflank run deploy"
+    "db:seed": "pnpm --filter @repo/db db:seed"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

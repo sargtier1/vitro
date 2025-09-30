@@ -16,6 +16,12 @@
       "persistent": true,
       "outputLogs": "full"
     },
+    "start": {
+      "dependsOn": ["^build", "db:generate"],
+      "cache": false,
+      "persistent": true,
+      "outputLogs": "full"
+    },
     "type-check": {
       "dependsOn": ["^build", "db:generate"],
       "outputLogs": "errors-only"

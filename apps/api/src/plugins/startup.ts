@@ -4,21 +4,14 @@ import { defineNitroPlugin } from 'nitropack/runtime';
 export default defineNitroPlugin(async (nitroApp) => {
   serverLogger.info('Initializing API server');
 
-  nitroApp.hooks.hook('listen', (server) => {
-    const address = server.address();
-    if (address && typeof address === 'object') {
-      const { port, address: host } = address;
-      serverLogger.success(`API server ready on http://${host}:${port}`);
-    } else {
-      serverLogger.success('API server ready');
-    }
-  });
+  // Log server startup - hook for server lifecycle events
+  serverLogger.success('API server initialized');
 
   nitroApp.hooks.hook('close', () => {
     serverLogger.info('API server shutting down');
   });
 
-  nitroApp.hooks.hook('error', (error) => {
+  nitroApp.hooks.hook('error', (error: Error) => {
     serverLogger.error(`API server error: ${error.message}`);
   });
 });

@@ -13,13 +13,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^0.7.5",
-    "@prisma/client": "^5.22.0",
-    "@repo/database": "workspace:*"
+    "@prisma/client": "catalog:",
+    "@repo/database": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "better-auth": "catalog:"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
     "@types/pg": "^8.11.0",
-    "typescript": "^5.0.0"
+    "typescript": "catalog:"
   }
 }

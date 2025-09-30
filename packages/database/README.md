@@ -1,18 +1,16 @@
-# @repo/database 🗃️
+# @repo/database
 
-Database package powered by **Prisma ORM** with **PostgreSQL** for type-safe database operations and schema management.
+Database package powered by Prisma ORM with PostgreSQL for type-safe database operations and schema management.
 
-## ✨ Features
+## Features
 
-- 🔷 **Prisma ORM** - Type-safe database client with auto-completion
-- 🐘 **PostgreSQL** - Robust relational database support
-- 🔐 **Better Auth Schema** - Pre-configured authentication tables
-- 📊 **GraphQL Integration** - Auto-generated GraphQL types via Pothos
-- 🔄 **CRUD Generation** - Automatic CRUD operations for GraphQL
-- 🛡️ **Type Safety** - Full TypeScript integration
-- 🏃‍♂️ **Lazy Loading** - Runtime initialization for optimal performance
+- Prisma ORM - Type-safe database client with auto-completion
+- PostgreSQL - Robust relational database support
+- Better Auth Schema - Pre-configured authentication tables
+- Type Safety - Full TypeScript integration
+- Lazy Loading - Runtime initialization for optimal performance
 
-## 📦 Installation
+## Installation
 
 This package is part of the monorepo and installed automatically with:
 
@@ -20,7 +18,7 @@ This package is part of the monorepo and installed automatically with:
 pnpm install
 ```
 
-## 🔧 Environment Variables
+## Environment Variables
 
 Required environment variable in root `.env`:
 
@@ -32,7 +30,7 @@ DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
 DATABASE_URL="postgresql://user:pass@ep-example.us-east-1.aws.neon.tech/dbname?sslmode=require"
 ```
 
-## 🚀 Usage
+## Usage
 
 ### Basic Database Operations
 
@@ -92,16 +90,6 @@ const postsWithAuthors = await prisma.post.findMany({
   take: 10
 });
 
-// Aggregations
-const userStats = await prisma.user.aggregate({
-  _count: { id: true },
-  where: {
-    createdAt: {
-      gte: new Date('2024-01-01')
-    }
-  }
-});
-
 // Transactions
 const result = await prisma.$transaction(async (tx) => {
   const user = await tx.user.create({
@@ -120,7 +108,7 @@ const result = await prisma.$transaction(async (tx) => {
 });
 ```
 
-## 🗃️ Database Schema
+## Database Schema
 
 ### User Management (Better Auth Compatible)
 
@@ -168,13 +156,6 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-model Verification {
-  id         String   @id @default(cuid())
-  identifier String   // Email or phone for verification
-  value      String   // Verification token/code
-  expiresAt  DateTime // Verification expiration
-}
 ```
 
 ### Content Management
@@ -193,7 +174,7 @@ model Post {
 }
 ```
 
-## 🏃‍♂️ Available Scripts
+## Available Scripts
 
 ```bash
 # Generate Prisma client
@@ -215,7 +196,7 @@ pnpm db:reset
 pnpm db:seed
 ```
 
-## 🔄 Database Migrations
+## Database Migrations
 
 ### Development Workflow
 
@@ -242,102 +223,7 @@ pnpm db:migrate
 pnpm db:deploy
 ```
 
-### Migration Commands
-
-```bash
-# Create migration
-pnpm dlx prisma migrate dev --name add_user_role
-
-# Reset migrations (development only)
-pnpm dlx prisma migrate reset
-
-# Deploy migrations (production)
-pnpm dlx prisma migrate deploy
-
-# View migration status
-pnpm dlx prisma migrate status
-```
-
-## 📊 GraphQL Integration
-
-The database automatically generates GraphQL types and CRUD operations:
-
-### Generated Types
-
-```typescript
-// Auto-generated from Prisma schema
-type User {
-  id: String!
-  name: String
-  email: String!
-  role: String!
-  createdAt: DateTime!
-  posts: [Post!]!
-}
-
-type Post {
-  id: String!
-  title: String!
-  content: String!
-  published: Boolean!
-  author: User!
-  createdAt: DateTime!
-}
-```
-
-### Auto-Generated Queries
-
-```graphql
-query GetUsers {
-  users {
-    id
-    name
-    email
-    posts {
-      id
-      title
-      published
-    }
-  }
-}
-
-query GetPost($id: String!) {
-  post(where: { id: $id }) {
-    id
-    title
-    content
-    author {
-      name
-      email
-    }
-  }
-}
-```
-
-### Auto-Generated Mutations
-
-```graphql
-mutation CreatePost($data: PostCreateInput!) {
-  createPost(data: $data) {
-    id
-    title
-    content
-    author {
-      name
-    }
-  }
-}
-
-mutation UpdatePost($where: PostWhereUniqueInput!, $data: PostUpdateInput!) {
-  updatePost(where: $where, data: $data) {
-    id
-    title
-    published
-  }
-}
-```
-
-## 🛡️ Type Safety & Validation
+## Type Safety & Validation
 
 ### Generated Types
 
@@ -362,27 +248,7 @@ async function createUserWithPost(data: CreateUserInput) {
 }
 ```
 
-### Input Validation
-
-```typescript
-import { z } from 'zod';
-
-// Validation schemas based on Prisma types
-const CreateUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(1).optional(),
-  role: z.enum(['user', 'admin']).default('user')
-});
-
-// Usage in API routes
-export async function createUser(input: unknown) {
-  const data = CreateUserSchema.parse(input);
-  
-  return prisma.user.create({ data });
-}
-```
-
-## 🔧 Configuration
+## Configuration
 
 ### Prisma Client Configuration
 
@@ -405,86 +271,11 @@ export const prisma = new PrismaClient({
 DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=20&pool_timeout=20"
 ```
 
-### Lazy Loading
-
-The database client uses lazy initialization to improve startup performance:
-
-```typescript
-// Client is created only when first used
-const user = await prisma.user.findFirst(); // Creates client here
-```
-
-## 🧪 Testing
-
-### Test Database Setup
-
-```typescript
-// test/setup.ts
-import { prisma } from '@repo/database';
-
-beforeEach(async () => {
-  // Clean database before each test
-  await prisma.$executeRaw`TRUNCATE TABLE "user", "post", "session" CASCADE`;
-});
-
-afterAll(async () => {
-  await prisma.$disconnect();
-});
-```
-
-### Test Helpers
-
-```typescript
-// test/helpers.ts
-export async function createTestUser(overrides: Partial<User> = {}) {
-  return prisma.user.create({
-    data: {
-      email: 'test@example.com',
-      name: 'Test User',
-      ...overrides
-    }
-  });
-}
-
-export async function createTestPost(authorId: string) {
-  return prisma.post.create({
-    data: {
-      title: 'Test Post',
-      content: 'Test content',
-      authorId
-    }
-  });
-}
-```
-
-## 🚀 Production Considerations
-
-### Database Connection
-
-```typescript
-// Production connection with retry logic
-import { PrismaClient } from '@prisma/client';
-
-export const prisma = new PrismaClient({
-  datasources: {
-    db: { url: process.env.DATABASE_URL }
-  },
-  log: ['error'],
-  errorFormat: 'minimal'
-});
-
-// Graceful shutdown
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
-});
-```
+## Production Considerations
 
 ### Performance Optimization
 
 ```typescript
-// Connection pooling
-DATABASE_URL="postgresql://user:pass@host:5432/db?connection_limit=10&pool_timeout=20&connect_timeout=60"
-
 // Query optimization
 const users = await prisma.user.findMany({
   select: { id: true, email: true }, // Select only needed fields
@@ -520,86 +311,8 @@ prisma.$on('query', (e) => {
 });
 ```
 
-## 🔍 Debugging
+## Related Documentation
 
-### Enable Query Logging
-
-```bash
-# Add to .env for development
-DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public&connection_limit=5"
-```
-
-### Prisma Studio
-
-```bash
-# Visual database browser
-pnpm db:studio
-
-# Opens at http://localhost:5555
-```
-
-### Common Issues
-
-**"Environment variable not found: DATABASE_URL"**
-```bash
-# Ensure DATABASE_URL is set
-echo "DATABASE_URL=postgresql://user:pass@localhost:5432/mydb" >> .env
-```
-
-**Migration errors**
-```bash
-# Reset development database
-pnpm dlx prisma migrate reset
-
-# Recreate from schema
-pnpm db:push
-```
-
-**Client generation issues**
-```bash
-# Force regenerate client
-rm -rf node_modules/.prisma
-pnpm db:generate
-```
-
-## 📚 Related Documentation
-
-- **[Prisma Documentation](https://www.prisma.io/docs/)** - Official Prisma docs
-- **[Better Auth Integration](../auth/README.md)** - Authentication setup
-- **[GraphQL Package](../graphql/README.md)** - Auto-generated GraphQL API
-- **[tRPC Package](../trpc/README.md)** - Type-safe API procedures
-
-## 🤝 Contributing
-
-When modifying the database schema:
-
-1. **Update schema**: Edit `prisma/schema.prisma`
-2. **Push changes**: Run `pnpm db:push` (development)
-3. **Generate client**: Run `pnpm db:generate`
-4. **Update GraphQL**: Types auto-generated via Pothos
-5. **Test changes**: Verify all integrations work
-6. **Create migration**: Run `pnpm db:migrate` (production)
-
-### Adding New Models
-
-```prisma
-// Example: Adding a Category model
-model Category {
-  id    String @id @default(cuid())
-  name  String @unique
-  posts Post[]
-
-  @@map("categories")
-}
-
-// Add relation to existing model
-model Post {
-  // ... existing fields
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
-}
-```
-
----
-
-**Built with Prisma for type-safe database operations** 🗃️
+- [Prisma Documentation](https://www.prisma.io/docs/)
+- [Better Auth Integration](../auth/README.md)
+- [tRPC Package](../trpc/README.md)

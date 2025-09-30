@@ -4,13 +4,14 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 import prompts from 'prompts';
+import { devLogger } from '@repo/logger';
 import { generatePackage } from './generator';
 
 const packageJson = JSON.parse(readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
 
 async function main() {
-  console.log(chalk.blue(`\n🚀 ${packageJson.name} v${packageJson.version}`));
-  console.log(chalk.gray('Generate new packages for your Turborepo monorepo\n'));
+  devLogger.startup(`${packageJson.name} v${packageJson.version}`);
+  devLogger.info('Generate new packages for your Turborepo monorepo');
 
   const response = await prompts([
     {
@@ -48,21 +49,24 @@ async function main() {
   ]);
 
   if (!response.type || !response.name) {
-    console.log(chalk.yellow('Generation cancelled'));
+    devLogger.warn('Generation cancelled');
     return;
   }
 
   try {
     const packagePath = await generatePackage(response);
-    console.log(chalk.green(`\n✅ Package created successfully at: ${packagePath}`));
-    console.log(chalk.gray('\nNext steps:'));
-    console.log(chalk.gray(`1. cd ${packagePath}`));
-    console.log(chalk.gray('2. pnpm install'));
-    console.log(chalk.gray('3. pnpm build'));
+    devLogger.success(`Package created successfully at: ${packagePath}`);
+    devLogger.info('Next steps:');
+    devLogger.info(`1. cd ${packagePath}`);
+    devLogger.info('2. pnpm install');
+    devLogger.info('3. pnpm build');
   } catch (error) {
-    console.error(chalk.red('❌ Failed to generate package:'), error);
+    devLogger.error(`Failed to generate package: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
   }
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  devLogger.error(`Unhandled error: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+});

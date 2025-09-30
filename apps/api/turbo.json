@@ -3,10 +3,10 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["WEB_URL", "API_PORT", "API_HOST", "NITRO_*"]
+      "env": ["API_URL", "PORT"]
     },
     "dev": {
-      "env": ["WEB_URL", "API_PORT", "API_HOST", "NITRO_*"]
+      "env": ["API_URL", "PORT"]
     }
   }
 }

@@ -5,10 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./server": "./src/server-exports.ts",
     "./client": "./src/client.ts",
-    "./react": "./src/react.tsx",
-    "./react-native": "./src/react-native.tsx",
-    "./server": "./src/server.ts",
     "./types": "./src/types.ts"
   },
   "scripts": {

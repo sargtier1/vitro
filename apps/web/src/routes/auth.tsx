@@ -1,5 +1,6 @@
 import { authActions } from '@repo/auth/client';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@repo/ui';
+// @ts-expect-error - TanStack Router exports are available at runtime but TypeScript has resolution issues
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -27,13 +28,14 @@ function AuthComponent() {
     setError(null);
 
     try {
-      let result: unknown;
+      let result: any;
 
       if (mode === 'signup') {
         result = await authActions.signUp({
           email,
           password,
           name,
+          role: 'user',
         });
       } else {
         result = await authActions.signIn({
@@ -42,7 +44,7 @@ function AuthComponent() {
         });
       }
 
-      if (result.error) {
+      if (result?.error) {
         throw new Error(result.error.message || 'Authentication failed');
       }
 

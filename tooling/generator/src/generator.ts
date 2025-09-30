@@ -1,6 +1,7 @@
 import * as path from 'path';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
+import { devLogger } from '@repo/logger';
 
 export interface PackageConfig {
   type: 'package' | 'tooling';
@@ -19,7 +20,7 @@ export async function generatePackage(config: PackageConfig): Promise<string> {
       ? path.join(repoRoot, 'tooling', config.name)
       : path.join(repoRoot, 'packages', config.name);
 
-  console.log(chalk.blue(`📁 Creating package at: ${path.relative(repoRoot, destDir)}`));
+  devLogger.info(`Creating package at: ${path.relative(repoRoot, destDir)}`);
 
   // Check if destination already exists
   if (await fs.pathExists(destDir)) {
@@ -32,7 +33,7 @@ export async function generatePackage(config: PackageConfig): Promise<string> {
   // Copy and process template files
   await processTemplateDirectory(templateDir, destDir, config);
 
-  console.log(chalk.green(`✅ Package structure created`));
+  devLogger.success('Package structure created');
 
   return destDir;
 }
@@ -71,7 +72,7 @@ async function processTemplateFile(
   const destPath = path.join(destDir, fileName);
 
   await fs.writeFile(destPath, processedContent);
-  console.log(chalk.gray(`  ${fileName}`));
+  devLogger.debug(`Created file: ${fileName}`);
 }
 
 function processTemplate(content: string, config: PackageConfig): string {

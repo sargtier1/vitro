@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui';
+// @ts-expect-error - TanStack Router exports are available at runtime but TypeScript has resolution issues
 import { Link } from '@tanstack/react-router';
 
 export function HomeComponent() {

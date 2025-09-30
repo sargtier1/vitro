@@ -1,19 +1,19 @@
-# @repo/ui 🎨
+# @repo/ui
 
-Shared UI component library built with **Shadcn/UI**, **Radix UI primitives**, and **Tailwind CSS** for consistent, accessible, and beautiful user interfaces.
+Shared UI component library built with Shadcn/UI, Radix UI primitives, and Tailwind CSS for consistent, accessible, and beautiful user interfaces.
 
-## ✨ Features
+## Features
 
-- 🧩 **Shadcn/UI Components** - High-quality, accessible React components
-- ⚡ **Radix UI Primitives** - Unstyled, accessible UI building blocks
-- 🎨 **Tailwind CSS** - Utility-first styling with CSS variables
-- 🔧 **Class Variance Authority** - Type-safe component variants
-- ♿ **Accessibility First** - ARIA compliance and keyboard navigation
-- 🌓 **Dark Mode Ready** - CSS variables for theme switching
-- 📱 **Responsive Design** - Mobile-first approach
-- 🎯 **TypeScript Support** - Full type safety for all components
+- Shadcn/UI Components - High-quality, accessible React components
+- Radix UI Primitives - Unstyled, accessible UI building blocks
+- Tailwind CSS - Utility-first styling with CSS variables
+- Class Variance Authority - Type-safe component variants
+- Accessibility First - ARIA compliance and keyboard navigation
+- Dark Mode Ready - CSS variables for theme switching
+- Responsive Design - Mobile-first approach
+- TypeScript Support - Full type safety for all components
 
-## 📦 Installation
+## Installation
 
 This package is part of the monorepo and installed automatically with:
 
@@ -21,7 +21,7 @@ This package is part of the monorepo and installed automatically with:
 pnpm install
 ```
 
-## 🧩 Available Components
+## Available Components
 
 ### Alert
 Status messages and notifications with customizable severity levels:
@@ -133,7 +133,7 @@ import { Separator } from '@repo/ui';
 
 **Orientations:** `horizontal` (default), `vertical`
 
-## 🎨 Styling & Customization
+## Styling & Customization
 
 ### CSS Variables
 The UI package uses CSS variables for theming:
@@ -174,36 +174,7 @@ const buttonClasses = cn(
 <button className={buttonClasses}>Click me</button>
 ```
 
-### Custom Variants
-Components use Class Variance Authority for type-safe variants:
-
-```tsx
-import { cva } from 'class-variance-authority';
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
-```
-
-## 🚀 Usage in Apps
+## Usage in Apps
 
 ### Import Components
 
@@ -235,7 +206,7 @@ Components automatically include the global CSS:
 import { Button } from '@repo/ui'; // Includes globals.css
 ```
 
-## 🔧 Adding New Components
+## Adding New Components
 
 ### Using Shadcn/UI CLI
 
@@ -295,7 +266,7 @@ export { Dialog, DialogTrigger, DialogContent }
 export { Dialog, DialogTrigger, DialogContent } from "./components/ui/dialog";
 ```
 
-## 🎯 Best Practices
+## Best Practices
 
 ### Component Composition
 Build complex UIs by composing simple components:
@@ -350,7 +321,7 @@ Components are mobile-first by default:
 </div>
 ```
 
-## 🌓 Dark Mode Support
+## Dark Mode Support
 
 ### Theme Toggle Implementation
 
@@ -374,84 +345,7 @@ function ThemeToggle() {
 }
 ```
 
-### System Theme Detection
-
-```tsx
-import { useEffect, useState } from 'react';
-
-function useTheme() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setTheme(mediaQuery.matches ? 'dark' : 'light');
-
-    const handler = (e: MediaQueryListEvent) => {
-      setTheme(e.matches ? 'dark' : 'light');
-    };
-
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
-
-  return { theme, setTheme };
-}
-```
-
-## 🧪 Testing Components
-
-### Component Testing
-
-```tsx
-import { render, screen } from '@testing-library/react';
-import { Button } from '@repo/ui';
-
-describe('Button', () => {
-  it('renders with default variant', () => {
-    render(<Button>Click me</Button>);
-    
-    const button = screen.getByRole('button', { name: 'Click me' });
-    expect(button).toHaveClass('bg-primary');
-  });
-
-  it('applies destructive variant', () => {
-    render(<Button variant="destructive">Delete</Button>);
-    
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-destructive');
-  });
-
-  it('handles disabled state', () => {
-    render(<Button disabled>Disabled</Button>);
-    
-    const button = screen.getByRole('button');
-    expect(button).toBeDisabled();
-  });
-});
-```
-
-### Accessibility Testing
-
-```tsx
-import { render } from '@testing-library/react';
-import { axe, toHaveNoViolations } from 'jest-axe';
-
-expect.extend(toHaveNoViolations);
-
-test('Alert has no accessibility violations', async () => {
-  const { container } = render(
-    <Alert>
-      <AlertTitle>Test Alert</AlertTitle>
-      <AlertDescription>This is a test alert.</AlertDescription>
-    </Alert>
-  );
-
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
-});
-```
-
-## 🚀 Build & Development
+## Build & Development
 
 ### Available Scripts
 
@@ -500,36 +394,8 @@ import { Button } from '@repo/ui/components/ui/button'; // Direct import
 import { cn } from '@repo/ui/lib/utils';                // Utility import
 ```
 
-## 📚 Related Documentation
+## Related Documentation
 
-- **[Shadcn/UI Documentation](https://ui.shadcn.com/)** - Official Shadcn/UI docs
-- **[Radix UI Documentation](https://www.radix-ui.com/)** - Primitive components
-- **[Tailwind CSS Documentation](https://tailwindcss.com/)** - Utility classes
-- **[Web App](../../apps/web/README.md)** - Frontend implementation
-
-## 🤝 Contributing
-
-When adding or modifying components:
-
-1. **Follow Shadcn/UI patterns**: Use the established component structure
-2. **Maintain accessibility**: Ensure ARIA compliance and keyboard navigation
-3. **Add TypeScript types**: Full type safety for props and variants
-4. **Test thoroughly**: Unit tests and accessibility tests
-5. **Update exports**: Add new components to `src/index.ts`
-6. **Document usage**: Add examples to this README
-
-### Component Checklist
-
-- [ ] Uses Radix UI primitives when available
-- [ ] Implements proper ARIA attributes
-- [ ] Supports keyboard navigation
-- [ ] Uses CSS variables for theming
-- [ ] Has TypeScript definitions
-- [ ] Includes variant support via CVA
-- [ ] Works in both light and dark modes
-- [ ] Has accompanying unit tests
-- [ ] Is exported from main index file
-
----
-
-**Built with Shadcn/UI and Radix UI for beautiful, accessible interfaces** 🎨
+- [Shadcn/UI Documentation](https://ui.shadcn.com/)
+- [Radix UI Documentation](https://www.radix-ui.com/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
