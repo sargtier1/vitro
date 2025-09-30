@@ -1,10 +1,10 @@
 # Full-Stack TypeScript Monorepo
 
-A modern full-stack application built with TypeScript, featuring unified deployment architecture where a single Nitro server serves both the React SPA and tRPC API endpoints.
+A modern full-stack application built with TypeScript, featuring independent deployment architecture where the React SPA and Nitro API server are deployed separately.
 
 ## Architecture
 
-**Unified Deployment**: One server handles both frontend and backend, eliminating CORS issues and simplifying deployment.
+**Independent Deployments**: Frontend and API are deployed separately to different services, with CORS configuration enabling cross-origin communication.
 
 - **Backend**: Nitro server with tRPC for type-safe APIs
 - **Frontend**: React SPA with TanStack Router
@@ -36,7 +36,7 @@ pnpm dev
 
 ```
 apps/
-├── api/              # Nitro API server (serves SPA + API)
+├── api/              # Nitro API server
 └── web/              # React frontend application
 
 packages/
@@ -60,7 +60,14 @@ pnpm dev              # Start all apps in development
 pnpm dev:api          # API server only (port 3001)
 pnpm dev:web          # Frontend only (port 5173)
 pnpm build            # Build all apps for production
-pnpm start            # Start production server
+
+# Build individual apps
+pnpm --filter @repo/api build    # Build API server only
+pnpm --filter @repo/web build    # Build frontend only
+
+# Start production servers
+pnpm --filter @repo/api start    # Start API server
+pnpm --filter @repo/web preview  # Preview built frontend
 ```
 
 ### Database Operations
@@ -76,7 +83,7 @@ pnpm db:reset         # Reset database
 ```bash
 pnpm lint             # Lint all packages
 pnpm type-check       # TypeScript type checking
-pnpm test             # Run tests
+# pnpm test             # Run tests (not yet implemented)
 pnpm biome:check      # Check formatting/linting
 pnpm biome:fix        # Fix formatting/linting issues
 ```
@@ -92,7 +99,7 @@ DATABASE_URL="postgresql://user:pass@localhost:5432/dbname"
 # Authentication
 BETTER_AUTH_SECRET="your-32-char-secret-key-here"
 
-# Development API URL (frontend proxy)
+# API URL for frontend (both dev and production)
 VITE_API_URL=http://localhost:3001
 
 # Server Configuration
@@ -103,7 +110,7 @@ NODE_ENV=development
 ### Development vs Production
 
 **Development**: Frontend (port 5173) proxies API calls to backend (port 3001)
-**Production**: Single server serves both frontend and API on same port
+**Production**: Frontend and API deployed independently with CORS configuration
 
 ## Key Features
 
@@ -136,7 +143,7 @@ NODE_ENV=development
 
 | Package | Description | Port |
 |---------|-------------|------|
-| `@repo/api` | Nitro API server with unified deployment | 3001 |
+|| `@repo/api` | Nitro API server | 3001 |
 | `@repo/web` | React SPA with TanStack Router | 5173 |
 
 ### Packages
@@ -159,21 +166,33 @@ NODE_ENV=development
 
 ## Deployment
 
-The application uses **unified deployment** where the API server serves both the backend API and frontend static files:
+### Independent Deployment Strategy
 
+The frontend and API are deployed separately:
+
+**Frontend (React SPA)**:
 ```bash
-# Build for production
-pnpm build
-
-# Start production server (serves both API and SPA)
-pnpm start
+# Build frontend
+pnpm --filter @repo/web build
+# Deploy to static hosting (Vercel, Netlify, etc.)
+# Set VITE_API_URL to API domain
 ```
 
-**Deployment targets**:
-- Vercel (recommended)
-- Railway
-- Netlify
-- Any Node.js hosting
+**API (Nitro Server)**:
+```bash
+# Build API
+pnpm --filter @repo/api build
+# Deploy to Node.js hosting (Railway, Render, etc.)
+# Set CORS_ORIGINS to include frontend domain
+```
+
+**Frontend hosting options**:
+- Vercel, Netlify, Cloudflare Pages (static hosting)
+- Any CDN or static file hosting
+
+**API hosting options**:
+- Railway, Render, Heroku (Node.js hosting)
+- Vercel, Netlify Functions (serverless)
 - Docker containers
 
 ## Tech Stack
@@ -206,8 +225,3 @@ pnpm db:seed                          # Populate with sample data
 pnpm db:deploy                        # Deploy migrations to production
 ```
 
-### Infrastructure
-```bash
-pnpm infra:setup                      # Setup infrastructure
-pnpm infra:deploy                     # Deploy infrastructure
-```
