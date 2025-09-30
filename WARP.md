@@ -18,7 +18,7 @@ This is a Turborepo monorepo with independent frontend and API deployments featu
 
 ```
 apps/
-├── api/           # Nitro-based API server (serves both API + SPA)
+├── api/           # Nitro-based API server
 └── web/           # React frontend app
 
 packages/          # Shared packages
