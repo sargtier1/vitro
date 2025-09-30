@@ -4,9 +4,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Architecture
 
-This is a Turborepo monorepo with a full-stack TypeScript application featuring:
+This is a Turborepo monorepo with independent frontend and API deployments featuring:
 
-- **Full-stack deployment**: Nitro-powered API server that serves both API endpoints and the built React SPA
+- **Independent deployments**: Separate React SPA and Nitro API server deployments
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: Better Auth with session-based authentication
 - **Type safety**: tRPC for end-to-end type-safe APIs
@@ -36,10 +36,11 @@ tooling/           # Development tools
 
 ### Key Technical Details
 
-- **Unified deployment**: The API app builds and serves the web app's static files
+- **Independent deployments**: Frontend and API are deployed separately to different services/domains
 - **Database**: Uses Prisma with PostgreSQL, includes Better Auth schema
 - **Environment**: Supports Turbo's "loose mode" for environment variables
 - **Routing**: Frontend uses TanStack Router, API uses Nitro file-based routing
+- **CORS**: Configured for cross-origin requests between frontend and API
 
 ## Common Commands
 
@@ -61,9 +62,13 @@ pnpm dev:web          # Frontend only
 # Build all apps
 pnpm build
 
-# Start production server (unified deployment)
-pnpm start            # Filtered to API (serves both API + web)
-pnpm start:simple     # Simple production start
+# Build individual apps
+pnpm --filter @repo/api build    # Build API server only
+pnpm --filter @repo/web build    # Build frontend only
+
+# Start production servers
+pnpm --filter @repo/api start    # Start API server
+pnpm --filter @repo/web preview  # Preview built frontend
 ```
 
 ### Database Operations
@@ -159,8 +164,30 @@ Testing setup is not yet configured. When implemented, you would use Turbo filte
 - The separation prevents Prisma from being bundled in the frontend
 
 ### Environment Variables
-- Development: Frontend proxies API calls to separate server
-- Production: Single server serves both frontend and API (unified deployment)
+- **Development**: Frontend (port 5173) proxies API calls to backend (port 3001)
+- **Production**: Frontend and API deployed independently with CORS configuration
+- **Frontend**: Uses `VITE_API_URL` to point to API server in both dev and production
+- **API**: Configured with `CORS_ORIGINS` for allowed frontend domains
+
+## Deployment
+
+### Independent Deployment Strategy
+
+The frontend and API are deployed separately:
+
+**Frontend (React SPA)**:
+- Build: `pnpm --filter @repo/web build`
+- Deploy to: Static hosting (Vercel, Netlify, etc.)
+- Environment: Set `VITE_API_URL` to API domain
+
+**API (Nitro Server)**:
+- Build: `pnpm --filter @repo/api build` 
+- Deploy to: Node.js hosting (Railway, Render, etc.)
+- Environment: Set `CORS_ORIGINS` to include frontend domain
+
+**Database**:
+- PostgreSQL instance (separate from both frontend and API)
+- Migrations: `pnpm db:deploy` in API deployment pipeline
 
 ## Package Manager
 
@@ -179,4 +206,5 @@ This project uses **pnpm** with workspace support. Key points:
 ### Development Issues
 - If types are wrong after schema changes: restart TypeScript server
 - If frontend can't reach API: check `VITE_API_URL` in `.env.local`
-- For CORS issues in development: add origins to `CORS_ORIGINS` in `.env.local`
+- For CORS issues: add frontend domain to `CORS_ORIGINS` in API environment
+- If authentication not working: ensure cookies/sessions work across domains
