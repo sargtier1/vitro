@@ -1,0 +1,19 @@
+[providers]
+node = true
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm"]
+
+[phases.install]
+cmds = [
+    "npm install -g corepack@0.24.1 && corepack enable",
+    "pnpm i --frozen-lockfile"
+]
+
+[phases.build]
+cmds = [
+    "pnpm install --frozen-lockfile && pnpm db:generate && pnpm --filter @repo/api build"
+]
+
+[start]
+cmd = "cd apps/api && node .output/server/index.mjs"

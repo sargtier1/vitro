@@ -6,10 +6,14 @@ export default defineNitroPlugin(async (nitroApp) => {
   nitroApp.hooks.hook('request', async (event) => {
     if (event.node.req.method === 'OPTIONS' && event.node.req.url?.startsWith('/api/')) {
       const origin = getHeader(event, 'origin');
+      
+      // Get allowed origins from environment or use defaults
+      const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(o => o.trim()) || [];
       const allowedOrigins = [
-        process.env.VITE_API_URL || 'http://localhost:3001',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
+        ...corsOrigins,
+        'http://localhost:5173', // Development frontend
+        'http://localhost:3001', // Development API
+        'http://*********:5173',
       ];
 
       // Set CORS headers for OPTIONS preflight
@@ -38,10 +42,14 @@ export default defineNitroPlugin(async (nitroApp) => {
   nitroApp.hooks.hook('beforeResponse', async (event) => {
     if (event.node.req.url?.startsWith('/api/')) {
       const origin = getHeader(event, 'origin');
+      
+      // Get allowed origins from environment or use defaults
+      const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(o => o.trim()) || [];
       const allowedOrigins = [
-        process.env.VITE_API_URL || 'http://localhost:3001',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
+        ...corsOrigins,
+        'http://localhost:5173', // Development frontend
+        'http://localhost:3001', // Development API
+        'http://*********:5173',
       ];
 
       // Allow the requesting origin if it's in our allowed list

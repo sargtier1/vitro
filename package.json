@@ -29,7 +29,11 @@
     "db:deploy": "turbo db:deploy",
     "db:studio": "pnpm --filter @repo/db db:studio",
     "db:reset": "pnpm --filter @repo/db db:reset",
-    "db:seed": "pnpm --filter @repo/db db:seed"
+    "db:seed": "pnpm --filter @repo/db db:seed",
+    "deploy:railway": "node scripts/deploy-railway.js",
+    "railway:status": "railway status",
+    "railway:logs": "railway logs",
+    "railway:shell": "railway shell"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
@@ -37,5 +41,9 @@
     "turbo": "latest",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@10.15.0"
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=20.19.0",
+    "pnpm": ">=10.15.0"
+  }
 }
